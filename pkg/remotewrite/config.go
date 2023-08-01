@@ -228,12 +228,14 @@ func parseEnvs(env map[string]string) (Config, error) {
 		c.Password = null.StringFrom(password)
 	}
 
-	envHeaders := getEnvMap(env, "K6_PROMETHEUS_RW_HEADERS_")
-	for k, v := range envHeaders {
+	envHeaders := strings.Split(env["K6_PROMETHEUS_RW_HTTP_HEADERS"], ",")
+	for _, rawHeader := range envHeaders {
 		if c.Headers == nil {
 			c.Headers = make(map[string]string)
 		}
-		c.Headers[k] = v
+		headerName := strings.TrimRight(rawHeader, ":")
+		headerValue := strings.Trim(strings.TrimLeft(rawHeader, ":"), " ")
+		c.Headers[headerName] = headerValue
 	}
 
 	if b, err := getEnvBool(env, "K6_PROMETHEUS_RW_TREND_AS_NATIVE_HISTOGRAM"); err != nil {
